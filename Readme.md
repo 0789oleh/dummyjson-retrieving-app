@@ -21,7 +21,7 @@
 | Store edited/deleted data in PostgreSQL        | Done   | All changes saved |
 | At least 2 related entities                    | Done   | User → Cart → Product |
 | Docker Compose (frontend + backend + db)       | Done   | One command: `docker compose up --build` |
-| Code formatted (Black + Prettier)              | Done   | Clean and consistent |
+| Code formatted (Flake8 + Prettier)              | Done   | Clean and consistent |
 | Unit tests (pytest)                            | Done   | Schema + CRUD tests |
 | Open GitHub repo + detailed README             | Done   | You’re reading it |
 
