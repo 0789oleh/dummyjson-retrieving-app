@@ -1,4 +1,3 @@
-# backend/app/services/dummy_loader.py
 import httpx
 import logging
 from sqlalchemy import select
@@ -22,7 +21,7 @@ async def load_initial_data():
         logger.info("БД пустая — загружаем данные с dummyjson.com")
 
         async with httpx.AsyncClient() as client:
-            # 1. Сначала пользователи
+            # 1. Users
             resp = await client.get("https://dummyjson.com/users")
             users_data = resp.json()["users"]
             user_id_map = {}  # ← сохраняем mapping dummyjson_id → наш id
@@ -38,7 +37,7 @@ async def load_initial_data():
             await db.commit()
             logger.info(f"Загружено {len(users_data)} пользователей")
 
-            # 2. Потом продукты
+            # 2. Products
             resp = await client.get("https://dummyjson.com/products")
             products_data = resp.json()["products"]
             product_id_map = {}
@@ -54,7 +53,7 @@ async def load_initial_data():
             await db.commit()
             logger.info(f"Загружено {len(products_data)} товаров")
 
-            # 3. Наконец корзины — только для существующих пользователей!
+            # 3. Finally carts — only for existing users!
             resp = await client.get("https://dummyjson.com/carts")
             carts_data = resp.json()["carts"]
             loaded_carts = 0
@@ -70,7 +69,7 @@ async def load_initial_data():
 
                 for item in c["products"]:
                     if item["id"] not in product_id_map:
-                        continue  # на случай, если продукта нет
+                        continue  # in case the product does not exist
                     db.add(CartItem(
                         cart_id=cart.id,
                         product_id=product_id_map[item["id"]],

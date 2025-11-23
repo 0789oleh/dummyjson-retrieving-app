@@ -1,13 +1,11 @@
-# backend/app/main.py
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import logging
 from fastapi.middleware.cors import CORSMiddleware
-# ЭТО ВСЁ РЕШИТ — импортируем ВСЕ модели ЯВНО и ДО Base!
 from app.models.user import User
 from app.models.product import Product
 from app.models.cart import Cart, CartItem
-from app.models.base import Base  # ← теперь Base точно знает про products!
+from app.models.base import Base
 
 from app.api.v1.router import api_router
 from app.database import engine

@@ -1,4 +1,3 @@
-# backend/app/schemas/product.py — УДАЛЯЕМ ProductCreate полностью
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime

@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { Routes, Route, Link } from "react-router-dom";
 import ProductsPage from "./pages/ProductsPage";
 import DashboardPage from './pages/DashboardPage';
