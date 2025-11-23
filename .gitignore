@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+frontend/node_modules/
+
+# Build artifacts
+backend/.venv/
+frontend/dist/
+frontend/.vite/
+frontend/build/
+
+# Environment
+*.env
+*.env.local
+.env
+
+# Docker
+.docker/
+docker-data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Temporary
+tmp/
+temp/
