@@ -61,7 +61,6 @@
 ### How to Run
 
 ```bash
-# Clone and run (one command!)
 git clone https://github.com/0789oleh/dummyjson-retrieving-app
 cd dummyjson-retrieving-app
 
