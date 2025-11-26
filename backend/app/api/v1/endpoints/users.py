@@ -5,47 +5,54 @@ from typing import List
 from app.crud import user as crud_user
 from app.schemas.user import User, UserCreate, UserUpdate, UserWithCartSchema
 from app.database import get_db
-
-router = APIRouter(prefix="/users", tags=["users"])
-
-
-@router.get("/", response_model=List[User])
-async def read_users(skip: int = 0, limit: int = 100,
-                     db: AsyncSession = Depends(get_db)):
-    users = await crud_user.get_users(db, skip=skip, limit=limit)
-    return users
+from app.crud.base import AbstractCRUD
 
 
-@router.get("/{user_id}", response_model=User)
-async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    db_user = await crud_user.get_user_by_id(db, user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+class UserController:
+    """Controller for User endpoints."""
 
+    __router = APIRouter(prefix="/users", tags=["users"])
+    __userCRUD = AbstractCRUD.create_crud()
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
-async def create_user(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
-    return await crud_user.create_user(db, user_in)
+    @__router.get("/", response_model=List[User])
+    async def read_users(self, skip: int = 0, limit: int = 100,
+                         db: AsyncSession = Depends(get_db)):
+        users = await self.__userCRUD.get_users(db, skip=skip, limit=limit)
+        return users
 
+    @__router.get("/{user_id}", response_model=User)
+    async def read_user(self, user_id: int,
+                        db: AsyncSession = Depends(get_db)):
+        db_user = await self.__userCRUD.get_user_by_id(db, user_id)
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user
 
-@router.patch("/{user_id}", response_model=User)
-async def update_user(user_id: int, user_update: UserUpdate,
-                      db: AsyncSession = Depends(get_db)):
-    db_user = await crud_user.update_user(db, user_id, user_update)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    @__router.post("/", response_model=User,
+                   status_code=status.HTTP_201_CREATED)
+    async def create_user(self, user_in: UserCreate,
+                          db: AsyncSession = Depends(get_db)):
+        return await self.__userCRUD.create_user(db, user_in)
 
+    @__router.patch("/{user_id}", response_model=User)
+    async def update_user(self, user_id: int, user_update: UserUpdate,
+                          db: AsyncSession = Depends(get_db)):
+        db_user = await self.__userCRUD.update_user(db, user_id, user_update)
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    success = await crud_user.delete_user(db, user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="User not found")
-    return None
+    @__router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+    async def delete_user(self, user_id: int,
+                          db: AsyncSession = Depends(get_db)):
+        success = await self.__userCRUD.delete_user(db, user_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="User not found")
+        return None
 
+    @__router.get("/with-carts", response_model=List[UserWithCartSchema])
+    async def get_users_with_carts(self, db: AsyncSession = Depends(get_db)):
+        return await crud_user.get_users_with_carts_dto(db)
 
-@router.get("/with-carts", response_model=List[UserWithCartSchema])
-async def get_users_with_carts(db: AsyncSession = Depends(get_db)):
-    return await crud_user.get_users_with_carts_dto(db)
+    def get_router(self):
+        return self.__router
