@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { productsApi } from "../api/api";
 
 interface Product {
   id: number;
@@ -50,7 +51,7 @@ export default function ProductsPage() {
 
   const saveEdit = async (id: number) => {
     try {
-      await axios.patch(`http://localhost:8000/products/${id}`, editForm);
+      await axios.patch(`${productsApi}/${id}`, editForm);
       setProducts((prev) =>
         prev.map((p) => (p.id === id ? { ...p, ...editForm } : p))
       );
@@ -63,7 +64,7 @@ export default function ProductsPage() {
   const deleteProduct = async (id: number) => {
     if (!confirm("Удалить товар?")) return;
     try {
-      await axios.delete(`http://localhost:8000/products/${id}`);
+      await axios.delete(`${productsApi}/${id}`);
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch {
       alert("Ошибка удаления");

@@ -4,13 +4,14 @@ from typing import List
 from app.schemas.cart import Cart, CartCreate, CartUpdate
 from app.database import get_db
 from app.crud.base import AbstractCRUD
+from app.crud.cart import CartCRUD
 
 
 class CartController:
     """Controller for Cart endpoints."""
 
     __router = APIRouter(prefix="/carts", tags=["carts"])
-    __cartCRUD = AbstractCRUD.create_crud()
+    __cartCRUD: CartCRUD = AbstractCRUD.create_crud()
 
     @__router.get("/", response_model=List[Cart])
     async def get(self, skip: int = 0, limit: int = 100,

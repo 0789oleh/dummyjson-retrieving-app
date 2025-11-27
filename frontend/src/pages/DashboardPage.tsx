@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/users/with-carts")
+    axios.get("http://{localhost:8000}/users/with-carts")
       .then(res => {
         setUsers(res.data);
         setLoading(false);

@@ -6,24 +6,25 @@ from app.crud import user as crud_user
 from app.schemas.user import User, UserCreate, UserUpdate, UserWithCartSchema
 from app.database import get_db
 from app.crud.base import AbstractCRUD
+from app.crud.user import UserCRUD
 
 
 class UserController:
     """Controller for User endpoints."""
 
     __router = APIRouter(prefix="/users", tags=["users"])
-    __userCRUD = AbstractCRUD.create_crud()
+    __userCRUD: UserCRUD = AbstractCRUD.create_crud()
 
     @__router.get("/", response_model=List[User])
     async def read_users(self, skip: int = 0, limit: int = 100,
                          db: AsyncSession = Depends(get_db)):
-        users = await self.__userCRUD.get_users(db, skip=skip, limit=limit)
+        users = await self.__userCRUD.get(db, skip=skip, limit=limit)
         return users
 
     @__router.get("/{user_id}", response_model=User)
     async def read_user(self, user_id: int,
                         db: AsyncSession = Depends(get_db)):
-        db_user = await self.__userCRUD.get_user_by_id(db, user_id)
+        db_user = await self.__userCRUD.get_by_id(db, user_id)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
         return db_user
@@ -32,12 +33,12 @@ class UserController:
                    status_code=status.HTTP_201_CREATED)
     async def create_user(self, user_in: UserCreate,
                           db: AsyncSession = Depends(get_db)):
-        return await self.__userCRUD.create_user(db, user_in)
+        return await self.__userCRUD.create(db, user_in)
 
     @__router.patch("/{user_id}", response_model=User)
     async def update_user(self, user_id: int, user_update: UserUpdate,
                           db: AsyncSession = Depends(get_db)):
-        db_user = await self.__userCRUD.update_user(db, user_id, user_update)
+        db_user = await self.__userCRUD.update(db, user_id, user_update)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
         return db_user
@@ -45,7 +46,7 @@ class UserController:
     @__router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
     async def delete_user(self, user_id: int,
                           db: AsyncSession = Depends(get_db)):
-        success = await self.__userCRUD.delete_user(db, user_id)
+        success = await self.__userCRUD.delete(db, user_id)
         if not success:
             raise HTTPException(status_code=404, detail="User not found")
         return None

@@ -14,7 +14,7 @@ from app.crud.base import AbstractCRUD
 class UserCRUD(AbstractCRUD):
     """CRUD operations for User model."""
 
-    async def get(db: AsyncSession, skip: int = 0, limit: int = 100):
+    async def get(self, db: AsyncSession, skip: int = 0, limit: int = 100):
         result = await db.execute(select(User).offset(skip).limit(limit))
         return result.scalars().all()
 
@@ -22,16 +22,16 @@ class UserCRUD(AbstractCRUD):
         result = await db.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
-    async def create(db: AsyncSession, user_in: UserCreate) -> User:
+    async def create(self, db: AsyncSession, user_in: UserCreate) -> User:
         db_user = User(**user_in.model_dump())
         db.add(db_user)
         await db.flush()
         await db.refresh(db_user)  # опционально, чтобы были все поля
         return db_user
 
-    async def update(db: AsyncSession, user_id: int, user_update: UserUpdate)\
-            -> Optional[User]:
-        db_user = await UserCRUD.get_by_id(db, user_id)
+    async def update(self, db: AsyncSession, user_id: int,
+                     user_update: UserUpdate) -> Optional[User]:
+        db_user = await self.get_by_id(db, user_id)
         if not db_user:
             return None
 
@@ -43,8 +43,8 @@ class UserCRUD(AbstractCRUD):
         await db.refresh(db_user)
         return db_user
 
-    async def delete(db: AsyncSession, user_id: int) -> bool:
-        db_user = await UserCRUD.get_by_id(db, user_id)
+    async def delete(self, db: AsyncSession, user_id: int) -> bool:
+        db_user = await self.get_by_id(db, user_id)
         if not db_user:
             return False
         await db.delete(db_user)
@@ -60,8 +60,8 @@ class UserCRUD(AbstractCRUD):
         )
         return result.scalars().all()
 
-    async def get_users_with_carts_dto(db: AsyncSession):
-        users = await UserCRUD.get_users_with_carts(db)
+    async def get_users_with_carts_dto(self, db: AsyncSession):
+        users = await self.get_users_with_carts(db)
         return [
             UserWithCartSchema(
                 id=u.id,

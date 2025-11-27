@@ -3,13 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.schemas.product import Product, ProductCreate
 from app.crud.base import AbstractCRUD
+from app.crud.product import ProductCRUD
 
 
 class ProductController:
     """Controller for Product endpoints."""
 
     __router = APIRouter(prefix="/products", tags=["products"])
-    __productCRUD = AbstractCRUD.create_crud()
+    __productCRUD: ProductCRUD = AbstractCRUD.create_crud()
 
     @__router.get("/", response_model=list[Product])
     async def read_products(self, skip: int = 0, limit: int = 100,
