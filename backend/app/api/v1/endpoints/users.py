@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-
-from app.crud import user as crud_user
 from app.schemas.user import User, UserCreate, UserUpdate, UserWithCartSchema
 from app.database import get_db
 from app.crud.base import AbstractCRUD
@@ -53,7 +51,7 @@ class UserController:
 
     @__router.get("/with-carts", response_model=List[UserWithCartSchema])
     async def get_users_with_carts(self, db: AsyncSession = Depends(get_db)):
-        return await crud_user.get_users_with_carts_dto(db)
+        return await self.__userCRUD.get_users_with_carts_dto(db)
 
     def get_router(self):
         return self.__router

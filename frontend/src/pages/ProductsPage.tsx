@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { productsApi } from "../api/api";
-
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  description?: string;
-}
-
+import type { Product } from "../../types/product";
+import { useProducts } from "../hooks/useProduct";
+import { ProductCard } from "../components/ProductCard";
+import { Pagination } from "../components/Pagination";
 
 
 
@@ -16,62 +12,33 @@ interface Product {
 const PAGE_SIZE = 12;
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const {
+    products,
+    loading,
+    error,
+    page,
+    setPage,
+    sortBy,
+    setSortBy,
+    totalPages,
+    editingId,
+    editForm,
+    setEditForm,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    deleteProduct
+  } = useProducts();
 
-  const [sortBy, setSortBy] = useState<"title" | "price-asc" | "price-desc">("title");
-
-  const sortedProducts = [...products].sort((a, b) => {
-    if (sortBy === "title") return a.title.localeCompare(b.title);
-    if (sortBy === "price-asc") return a.price - b.price;
-    if (sortBy === "price-desc") return b.price - a.price;
-    return 0;
-  });
-
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ title: "", price: 0 });
-
-  useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${(page - 1) * PAGE_SIZE}`)
-      .then((res) => {
-        setProducts(res.data.products);
-        setTotal(res.data.total);
-        setLoading(false);
-      });
-  }, [page]);
-
-  const startEdit = (p: Product) => {
-    setEditingId(p.id);
-    setEditForm({ title: p.title, price: p.price });
-  };
-
-  const saveEdit = async (id: number) => {
-    try {
-      await axios.patch(`${productsApi}/${id}`, editForm);
-      setProducts((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, ...editForm } : p))
-      );
-      setEditingId(null);
-    } catch {
-      alert("Ошибка сохранения — бэкенд должен быть запущен");
-    }
-  };
-
-  const deleteProduct = async (id: number) => {
-    if (!confirm("Удалить товар?")) return;
-    try {
-      await axios.delete(`${productsApi}/${id}`);
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      alert("Ошибка удаления");
-    }
-  };
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="text-red-600 text-xl">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
@@ -85,26 +52,33 @@ export default function ProductsPage() {
           </p>
         </header>
 
+        {/* Кнопки сортировки */}
         <div className="flex justify-center gap-4 mb-8 flex-wrap">
-  <button
-    onClick={() => setSortBy("title")}
-    className={`px-6 py-3 rounded-lg font-medium transition ${sortBy === "title" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}
-  >
-    По названию
-  </button>
-  <button
-    onClick={() => setSortBy("price-asc")}
-    className={`px-6 py-3 rounded-lg font-medium transition ${sortBy === "price-asc" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}
-  >
-    По цене ↑
-  </button>
-  <button
-    onClick={() => setSortBy("price-desc")}
-    className={`px-6 py-3 rounded-lg font-medium transition ${sortBy === "price-desc" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}
-  >
-    По цене ↓
-  </button>
-</div>
+          <button
+            onClick={() => setSortBy('title')}
+            className={`px-6 py-3 rounded-lg font-medium transition ${
+              sortBy === 'title' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            По названию
+          </button>
+          <button
+            onClick={() => setSortBy('price-asc')}
+            className={`px-6 py-3 rounded-lg font-medium transition ${
+              sortBy === 'price-asc' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            По цене ↑
+          </button>
+          <button
+            onClick={() => setSortBy('price-desc')}
+            className={`px-6 py-3 rounded-lg font-medium transition ${
+              sortBy === 'price-desc' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            По цене ↓
+          </button>
+        </div>
 
         {loading ? (
           <div className="text-center py-20">
@@ -112,108 +86,29 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
+            {/* Сетка продуктов */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedProducts.map((p) => (
-                <div
+              {products.map((p) => (
+                <ProductCard
                   key={p.id}
-                  className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
-                >
-                  <div className="bg-gray-200 border-2 border-dashed rounded-t-xl w-full h-48" />
-                  
-                  <div className="p-5">
-                    {editingId === p.id ? (
-                      <div className="space-y-3">
-                        <input
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          value={editForm.title}
-                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        />
-                        <input
-                          type="number"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          value={editForm.price}
-                          onChange={(e) => setEditForm({ ...editForm, price: +e.target.value })}
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => saveEdit(p.id)}
-                            className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-                          >
-                            Сохранить
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
-                          >
-                            Отмена
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="font-bold text-lg text-gray-800 line-clamp-2">
-                          {p.title}
-                        </h3>
-                        <p className="text-3xl font-bold text-indigo-600 mt-2">
-                          ${p.price}
-                        </p>
-                        {p.description && (
-                          <p className="text-sm text-gray-600 mt-3 line-clamp-3">
-                            {p.description}
-                          </p>
-                        )}
-
-                        <div className="mt-5 flex gap-3">
-                          <button
-                            onClick={() => startEdit(p)}
-                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                          >
-                            Редактировать
-                          </button>
-                          <button
-                            onClick={() => deleteProduct(p.id)}
-                            className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-medium"
-                          >
-                            Удалить
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+                  product={p}
+                  isEditing={editingId === p.id}
+                  editForm={editForm}
+                  onEditFormChange={setEditForm}
+                  onStartEdit={() => startEdit(p)}
+                  onSaveEdit={saveEdit}
+                  onCancelEdit={cancelEdit}
+                  onDelete={() => deleteProduct(p.id)}
+                />
               ))}
             </div>
 
             {/* Пагинация */}
-            <div className="flex justify-center items-center gap-4 mt-12">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className={`px-6 py-3 rounded-lg font-medium transition ${
-                  page === 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                }`}
-              >
-                ← Назад
-              </button>
-
-              <span className="text-lg font-medium text-gray-700">
-                Страница {page} из {totalPages} ({total} товаров)
-              </span>
-
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page >= totalPages}
-                className={`px-6 py-3 rounded-lg font-medium transition ${
-                  page >= totalPages
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                }`}
-              >
-                Вперед →
-              </button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </>
         )}
       </div>

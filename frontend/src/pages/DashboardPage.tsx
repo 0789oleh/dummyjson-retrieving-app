@@ -24,20 +24,7 @@ interface User {
 }
 
 export default function DashboardPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    axios.get("http://{localhost:8000}/users/with-carts")
-      .then(res => {
-        setUsers(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        alert("Не забудь запустить бэкенд: docker compose up --build");
-        setLoading(false);
-      });
-  }, []);
+  
 
   if (loading) return <div className="text-center py-20 text-2xl">Загрузка пользователей и корзин...</div>;
 

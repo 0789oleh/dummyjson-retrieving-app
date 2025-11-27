@@ -1,6 +1,8 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import type { Product } from '../../types/product';
+import { clear } from 'console';
+import type { Cart } from '../../types/cart';
 
 dotenv.config();
 
@@ -31,8 +33,11 @@ export const usersApi = {
 };
 
 export const cartsApi = {
-  getByUser: (userId: number) => handleRequest(api.get(`/carts/user/${userId}`)),
+  getByUser: (userId: number) => handleRequest<Cart>(api.get(`/carts/user/${userId}`)),
   addItem: (userId: number, data: any) => handleRequest(api.post(`/carts/user/${userId}/items`, data)),
-  removeItem: (userId: number, itemId: number) => handleRequest(api.delete(`/carts/user/${userId}/items/${itemId}`)),  
+  removeItem: (userId: number, itemId: number) => handleRequest(api.delete(`/carts/user/${userId}/items/${itemId}`)),
+  clearCart: (userId: number) => handleRequest(api.delete(`/carts/user/${userId}`)),
+  updateItem: (userId: number, itemId: number, data: any) => handleRequest(api.put(`/carts/user/${userId}/items/${itemId}`, data)),
+  createCart: (userId: number, data: any) => handleRequest(api.post(`/carts/user/${userId}`, data)), 
   // etc.
 };
