@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { productsApi } from "../api/api";
-import type { Product } from "../../types/product";
 import { useProducts } from "../hooks/useProduct";
+import { useState } from "react";
 import { ProductCard } from "../components/ProductCard";
 import { Pagination } from "../components/Pagination";
-
-
-
-
-const PAGE_SIZE = 12;
+import { useCart } from "../hooks/useCart";
+import { ProductForm } from "../components/ProductForm";
 
 export default function ProductsPage() {
   const {
@@ -18,17 +12,16 @@ export default function ProductsPage() {
     error,
     page,
     setPage,
+    updateProduct,
     sortBy,
     setSortBy,
     totalPages,
-    editingId,
-    editForm,
-    setEditForm,
-    startEdit,
-    cancelEdit,
-    saveEdit,
     deleteProduct
   } = useProducts();
+
+  const { addItem } = useCart(1); // Предполагаем, что пользователь с ID 1 залогинен
+
+  const [editingProduct, setEditingProduct] = useState<null | typeof products[0]>(null);
 
   if (error) {
     return (
@@ -38,6 +31,16 @@ export default function ProductsPage() {
         </div>
       </div>
     );
+  }
+
+  const handleSaveEdit = async (productData: any) => {
+  if (!editingProduct) return;
+  
+  try {
+    await updateProduct(editingProduct.id, productData);
+    setEditingProduct(null);
+  } catch (error) {
+    console.error('Failed to update product:', error);
   }
 
   return (
@@ -51,6 +54,8 @@ export default function ProductsPage() {
             Просмотр • Редактирование • Удаление • Сохранение в PostgreSQL
           </p>
         </header>
+
+          
 
         {/* Кнопки сортировки */}
         <div className="flex justify-center gap-4 mb-8 flex-wrap">
@@ -80,6 +85,21 @@ export default function ProductsPage() {
           </button>
         </div>
 
+        {/* 👇 Модальное окно редактирования */}
+        {editingProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4">Редактировать товар</h2>
+              
+              <ProductForm
+                product={editingProduct}
+                onSubmit={handleSaveEdit}
+                onCancel={() => setEditingProduct(null)}
+              />
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
@@ -89,17 +109,13 @@ export default function ProductsPage() {
             {/* Сетка продуктов */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  isEditing={editingId === p.id}
-                  editForm={editForm}
-                  onEditFormChange={setEditForm}
-                  onStartEdit={() => startEdit(p)}
-                  onSaveEdit={saveEdit}
-                  onCancelEdit={cancelEdit}
-                  onDelete={() => deleteProduct(p.id)}
-                />
+                 <ProductCard
+          key={p.id}
+          product={p}
+          onAddToCart={() => addItem(p.id)}
+          onEdit={() => setEditingProduct(p)} // ✅ Просто сигнализируем
+          onDelete={() => deleteProduct(p.id)}
+        />
               ))}
             </div>
 
@@ -114,4 +130,4 @@ export default function ProductsPage() {
       </div>
     </div>
   );
-}
+}};

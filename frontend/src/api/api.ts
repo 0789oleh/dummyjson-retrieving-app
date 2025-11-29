@@ -1,8 +1,9 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import type { Product } from '../../types/product';
-import { clear } from 'console';
 import type { Cart } from '../../types/cart';
+import type { User, UserWithCart } from '../../types/user';
+import type { DashboardStats } from '../../types/dashboard';
 
 dotenv.config();
 
@@ -26,9 +27,9 @@ export const productsApi = {
 };
 
 export const usersApi = {
-  getAll: () => handleRequest(api.get('/users')),
-  create: (data: any) => handleRequest(api.post('/users', data)),
-  update: (id: number, data: any) => handleRequest(api.put(`/users/${id}`, data)),
+  getAll: () => handleRequest<User[]>(api.get('/users')),
+  create: (data: any) => handleRequest<User>(api.post('/users', data)),
+  update: (id: number, data: any) => handleRequest<User>(api.put(`/users/${id}`, data)),
   delete: (id: number) => handleRequest(api.delete(`/users/${id}`)),
 };
 
@@ -39,5 +40,12 @@ export const cartsApi = {
   clearCart: (userId: number) => handleRequest(api.delete(`/carts/user/${userId}`)),
   updateItem: (userId: number, itemId: number, data: any) => handleRequest(api.put(`/carts/user/${userId}/items/${itemId}`, data)),
   createCart: (userId: number, data: any) => handleRequest(api.post(`/carts/user/${userId}`, data)), 
-  // etc.
+};
+
+export const dashboardApi = {
+  getUsersWithCarts: (): Promise<UserWithCart[]> => 
+    handleRequest(api.get<UserWithCart[]>('/dashboard/users-with-carts')),
+  
+  getStats: (): Promise<DashboardStats> =>
+    handleRequest(api.get<DashboardStats>('/dashboard/stats')),
 };

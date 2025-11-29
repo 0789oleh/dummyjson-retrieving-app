@@ -1,32 +1,27 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  cart?: {
-    items: CartItem[];
-    totalPrice: number;
-  };
-}
+// components/DashboardPage.tsx
+import { useDashboard } from '../hooks/useDashboard';
+import { StatsCards } from '../components/StatCards';
+import { UserCards } from '../components/UserCards';
 
 export default function DashboardPage() {
-  
+  const { users, stats, loading, error, refresh } = useDashboard();
 
-  if (loading) return <div className="text-center py-20 text-2xl">Загрузка пользователей и корзин...</div>;
+  if (loading) return (
+    <>
+      <div>Загрузка...</div>
+      <div>Пожалуйста, подождите</div>
+    </>
+  );
+
+  if (error) {
+    return (
+      <div>
+        <div>{error}</div>
+        <button onClick={refresh}>Повторить</button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
@@ -38,46 +33,13 @@ export default function DashboardPage() {
           <p className="text-xl text-gray-600">
             Данные из dummyjson.com + связи + PostgreSQL
           </p>
+          
+          {/* Статистика */}
+          {stats && <StatsCards stats={stats} />}
         </header>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {users.map(user => (
-            <div key={user.id} className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {user.firstName[0]}{user.lastName[0]}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    {user.firstName} {user.lastName}
-                  </h3>
-                  <p className="text-gray-600">{user.email}</p>
-                </div>
-              </div>
-
-              {user.cart ? (
-                <div className="border-t pt-6">
-                  <h4 className="font-semibold text-lg mb-4">Корзина ({user.cart.items.length} товаров):</h4>
-                  <div className="space-y-3">
-                    {user.cart.items.map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm">
-                        <span className="text-gray-700">{item.product.title} × {item.quantity}</span>
-                        <span className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 pt-6 border-t text-right">
-                    <span className="text-2xl font-bold text-indigo-600">
-                      Итого: ${user.cart.totalPrice.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">Корзина пуста</p>
-              )}
-            </div>
-          ))}
-        </div>
+        {/* Пользователи */}
+        <UserCards users={users} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cartsApi } from '../api/api';
-import type { Cart, CartItem } from '../../types/cart';
+import type { Cart } from '../../types/cart';
 
 export function useCart(userId?: number) {
   const [cart, setCart] = useState<Cart | null>(null);

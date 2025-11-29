@@ -36,7 +36,7 @@ export function useProducts() {
   }, []);
 
   // Сортировка и пагинация
-  const { sortedProducts, totalPages, paginatedProducts } = useMemo(() => {
+  const { totalPages, paginatedProducts } = useMemo(() => {
     // Сортировка
     const sorted = [...products].sort((a, b) => {
       switch (sortBy) {
@@ -105,6 +105,7 @@ export function useProducts() {
     setEditingId(product.id);
     setEditForm({ title: product.title, price: product.price });
   };
+  
 
   const cancelEdit = () => {
     setEditingId(null);
@@ -114,6 +115,7 @@ export function useProducts() {
   const saveEdit = () => {
     if (editingId) {
       updateProduct(editingId, editForm);
+      setEditForm({ title: '', price: 0 });
     }
   };
 
