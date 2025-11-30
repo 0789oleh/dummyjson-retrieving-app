@@ -11,11 +11,9 @@ UpdateSchema = TypeVar('UpdateSchema', bound=BaseModel)  # Update type
 class AbstractCRUD(Generic[T, CreateSchema, UpdateSchema], ABC):
     """Abstract base class for CRUD operations."""
 
-    @classmethod
-    async def create_crud(cls)\
-            -> 'AbstractCRUD[T, CreateSchema, UpdateSchema]':
-        """factory method to create CRUD instance."""
-        return cls()  # for simplicity, just return an instance of the class
+    @staticmethod
+    def create_crud(crud_cls: type['AbstractCRUD']) -> 'AbstractCRUD':
+        return crud_cls()
 
     @abstractmethod
     async def get(self, obj_in: Any) -> list[T]:

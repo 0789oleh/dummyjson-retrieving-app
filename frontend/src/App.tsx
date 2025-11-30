@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, BrowserRouter } from "react-router-dom";
 import ProductsPage from "./pages/ProductsPage";
 import DashboardPage from './pages/DashboardPage';
 
@@ -27,12 +27,14 @@ function Navigation() {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-      </Routes>
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }

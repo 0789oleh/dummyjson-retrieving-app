@@ -5,7 +5,6 @@ from .base import Base
 
 class User(Base):
     __tablename__ = "users"
-    firstName: Mapped[str] = mapped_column(String, index=True)
-    lastName: Mapped[str] = mapped_column(String, index=True)
+    first_name: Mapped[str] = mapped_column("firstName", String, index=True)
+    last_name: Mapped[str] = mapped_column("lastName", String, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
-    # Добавь другие поля из dummyjson, если нужно

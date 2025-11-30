@@ -1,13 +1,10 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import type { Product } from '../../types/product';
 import type { Cart } from '../../types/cart';
 import type { User, UserWithCart } from '../../types/user';
 import type { DashboardStats } from '../../types/dashboard';
 
-dotenv.config();
-
-const api = axios.create({ baseURL: process.env.BASE_URL});
+const api = axios.create({ baseURL: import.meta.env.VITE_BASE_URL });
 
 const handleRequest = async <T>(promise: Promise<any>): Promise<T> => {
   try {

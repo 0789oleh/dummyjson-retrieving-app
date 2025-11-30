@@ -5,8 +5,8 @@ from app.schemas.cart import Cart
 
 
 class UserBase(BaseModel):
-    firstName: str
-    lastName: str
+    first_name: str
+    last_name: str
     email: EmailStr
 
     model_config = {"from_attributes": True}  # вместо class Config
@@ -31,13 +31,13 @@ class CartItemSchema(BaseModel):
 
 class CartSchema(BaseModel):
     items: List[CartItemSchema]
-    totalPrice: float
+    total_price: float
     model_config = {"from_attributes": True}
 
 
 class UserUpdate(BaseModel):
-    firstName: Optional[str] = None
-    lastName: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     model_config = {"from_attributes": True}
 
@@ -50,8 +50,8 @@ class User(UserBase):
 
 class UserWithCartSchema(BaseModel):
     id: int
-    firstName: str
-    lastName: str
+    first_name: str
+    last_name: str
     email: str
     cart: Optional[CartSchema] = None
     model_config = {"from_attributes": True}

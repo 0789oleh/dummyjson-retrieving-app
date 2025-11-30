@@ -19,9 +19,20 @@ export default function ProductsPage() {
     deleteProduct
   } = useProducts();
 
-  const { addItem } = useCart(1); // Предполагаем, что пользователь с ID 1 залогинен
+  const { addItem } = useCart(1); // Пользователь 1
 
   const [editingProduct, setEditingProduct] = useState<null | typeof products[0]>(null);
+
+  const handleSaveEdit = async (productData: any) => {
+    if (!editingProduct) return;
+
+    try {
+      await updateProduct(editingProduct.id, productData);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Failed to update product:', error);
+    }
+  };
 
   if (error) {
     return (
@@ -31,16 +42,6 @@ export default function ProductsPage() {
         </div>
       </div>
     );
-  }
-
-  const handleSaveEdit = async (productData: any) => {
-  if (!editingProduct) return;
-  
-  try {
-    await updateProduct(editingProduct.id, productData);
-    setEditingProduct(null);
-  } catch (error) {
-    console.error('Failed to update product:', error);
   }
 
   return (
@@ -54,8 +55,6 @@ export default function ProductsPage() {
             Просмотр • Редактирование • Удаление • Сохранение в PostgreSQL
           </p>
         </header>
-
-          
 
         {/* Кнопки сортировки */}
         <div className="flex justify-center gap-4 mb-8 flex-wrap">
@@ -85,12 +84,11 @@ export default function ProductsPage() {
           </button>
         </div>
 
-        {/* 👇 Модальное окно редактирования */}
+        {/* Модальное редактирование */}
         {editingProduct && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h2 className="text-xl font-bold mb-4">Редактировать товар</h2>
-              
               <ProductForm
                 product={editingProduct}
                 onSubmit={handleSaveEdit}
@@ -109,25 +107,21 @@ export default function ProductsPage() {
             {/* Сетка продуктов */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((p) => (
-                 <ProductCard
-          key={p.id}
-          product={p}
-          onAddToCart={() => addItem(p.id)}
-          onEdit={() => setEditingProduct(p)} // ✅ Просто сигнализируем
-          onDelete={() => deleteProduct(p.id)}
-        />
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  onAddToCart={() => addItem(p.id, 1)}
+                  onEdit={() => setEditingProduct(p)}
+                  onDelete={deleteProduct}
+                />
               ))}
             </div>
 
             {/* Пагинация */}
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-            />
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>
     </div>
   );
-}};
+}
