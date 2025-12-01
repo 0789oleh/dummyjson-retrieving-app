@@ -13,3 +13,9 @@ dashboardCRUD: DashboardCRUD = DashboardCRUD()
 async def get_users_with_carts(skip: int = 0, limit: int = 100,
                                db: AsyncSession = Depends(get_db)):
     return await dashboardCRUD.get_users_with_carts(db, skip, limit)
+
+
+@router.get("/stats", response_model=List[UserWithCart])
+async def get_stats(skip: int = 0, limit: int = 100,
+                           db: AsyncSession = Depends(get_db)):
+    return await dashboardCRUD.stats(db, skip, limit)

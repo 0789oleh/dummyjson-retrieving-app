@@ -1,3 +1,4 @@
+from itertools import count
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import join, select
 from app.models.user import User
@@ -66,3 +67,9 @@ class DashboardCRUD:
                 })
 
         return [UserWithCart.model_validate(u) for u in users_dict.values()]
+
+    async def stats(self, db: AsyncSession):
+        # Пример простой статистики: количество пользователей
+        users = await db.execute(select(count(User)))
+        count_users = users.scalar_one()
+        return count_users
